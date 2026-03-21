@@ -1,0 +1,144 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              Int              @id @default(autoincrement())
+  vkId            Int              @unique
+  firstName       String
+  lastName        String
+  phone           String?
+  email           String?
+  role            Role             @default(USER)
+  notifyEnabled   Boolean          @default(false)
+  bookings        Booking[]
+  teacherRequests TeacherRequest[]
+  createdAt       DateTime         @default(now())
+
+  @@index([vkId])
+}
+
+model Exposition {
+  id          Int         @id @default(autoincrement())
+  title       String
+  description String
+  imageUrl    String?
+  schedule    String
+  isActive    Boolean     @default(true)
+  excursions  Excursion[]
+  createdAt   DateTime    @default(now())
+}
+
+model Excursion {
+  id           Int        @id @default(autoincrement())
+  expositionId Int
+  exposition   Exposition @relation(fields: [expositionId], references: [id])
+  title        String
+  price        Int
+  maxGroupSize Int        @default(30)
+  durationMin  Int
+  timeSlots    TimeSlot[]
+  createdAt    DateTime   @default(now())
+
+  @@index([expositionId])
+}
+
+model TimeSlot {
+  id             Int       @id @default(autoincrement())
+  excursionId    Int
+  excursion      Excursion @relation(fields: [excursionId], references: [id])
+  date           DateTime  @db.Date
+  time           String
+  availableSpots Int
+  bookings       Booking[]
+
+  @@index([excursionId, date])
+}
+
+model Booking {
+  id          Int           @id @default(autoincrement())
+  userId      Int
+  user        User          @relation(fields: [userId], references: [id])
+  timeSlotId  Int
+  timeSlot    TimeSlot      @relation(fields: [timeSlotId], references: [id])
+  peopleCount Int
+  status      BookingStatus @default(PENDING)
+  code        String        @unique
+  createdAt   DateTime      @default(now())
+
+  @@index([userId])
+  @@index([timeSlotId])
+  @@index([status])
+}
+
+model Event {
+  id        Int        @id @default(autoincrement())
+  title     String
+  content   String
+  imageUrl  String?
+  eventDate DateTime?
+  type      EventType
+  isActive  Boolean    @default(true)
+  createdAt DateTime   @default(now())
+
+  @@index([type])
+}
+
+model TeacherRequest {
+  id            Int           @id @default(autoincrement())
+  userId        Int
+  user          User          @relation(fields: [userId], references: [id])
+  school        String
+  className     String
+  studentsCount Int
+  expositionId  Int
+  preferredDate DateTime      @db.Date
+  phone         String
+  status        RequestStatus @default(PENDING)
+  createdAt     DateTime      @default(now())
+
+  @@index([userId])
+  @@index([status])
+}
+
+model Faq {
+  id       Int     @id @default(autoincrement())
+  question String
+  answer   String
+  order    Int     @default(0)
+  isActive Boolean @default(true)
+}
+
+enum Role {
+  USER
+  TEACHER
+  MODERATOR
+  ADMIN
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum EventType {
+  EXHIBITION
+  NEWS
+  LECTURE
+  WORKSHOP
+}
+
+enum RequestStatus {
+  PENDING
+  REVIEWING
+  CONFIRMED
+  REJECTED
+}

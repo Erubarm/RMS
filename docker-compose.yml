@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: rmi-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: rmi_user
+      POSTGRES_PASSWORD: rmi_secret
+      POSTGRES_DB: rmi_db
+    ports:
+      - "5434:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rmi_user -d rmi_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:
