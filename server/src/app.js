@@ -5,6 +5,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 
+const path = require('path');
 const { authMiddleware } = require('./middleware/auth');
 const errorHandler = require('./middleware/errorHandler');
 
@@ -19,9 +20,13 @@ const adminRouter = require('./routes/admin');
 const { startCronJobs } = require('./services/cronService');
 
 const app = express();
+app.set('trust proxy', 1); // cloudflare / nginx proxy
 
 // Security & parsing
-app.use(helmet());
+app.use(helmet({
+  frameguard: false, // VK Mini App работает в iframe
+  contentSecurityPolicy: false, // CSP настраивается на стороне VK
+}));
 app.use(cors());
 app.use(express.json());
 
@@ -72,6 +77,13 @@ app.use('/api/notifications', notificationsRouter);
 
 // Error handler
 app.use(errorHandler);
+
+// Serve client (after API routes)
+const clientDist = path.join(__dirname, '../../client/dist');
+app.use(express.static(clientDist));
+app.get('*splat', (req, res) => {
+  res.sendFile(path.join(clientDist, 'index.html'));
+});
 
 module.exports = app;
 
