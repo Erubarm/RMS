@@ -20,8 +20,8 @@ async function main() {
     prisma.exposition.create({
       data: {
         title: 'Рюриковичи',
-        description:
-          'Мультимедийная экспозиция об эпохе Рюриковичей — от призвания варягов до воцарения Романовых. Вы увидите ключевые события: Крещение Руси, монголо-татарское нашествие, объединение русских земель вокруг Москвы, эпоху Ивана Грозного.',
+        description: 'Мультимедийная экспозиция об эпохе Рюриковичей — от призвания варягов до воцарения Романовых. Вы увидите ключевые события: Крещение Руси, монголо-татарское нашествие, объединение русских земель вокруг Москвы, эпоху Ивана Грозного.',
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Vasnetsov_Invitation_of_the_Varangians.jpg/400px-Vasnetsov_Invitation_of_the_Varangians.jpg',
         schedule: 'СР–ВС 11:00–19:00',
         isActive: true,
       },
@@ -29,8 +29,8 @@ async function main() {
     prisma.exposition.create({
       data: {
         title: 'Романовы',
-        description:
-          'Интерактивная экспозиция о трёхсотлетнем правлении династии Романовых. Реформы Петра I, золотой век Екатерины II, Отечественная война 1812 года, отмена крепостного права и промышленный подъём Российской империи.',
+        description: 'Интерактивная экспозиция о трёхсотлетнем правлении династии Романовых. Реформы Петра I, золотой век Екатерины II, Отечественная война 1812 года, отмена крепостного права и промышленный подъём Российской империи.',
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Peter_the_Great_by_Kneller.jpg/400px-Peter_the_Great_by_Kneller.jpg',
         schedule: 'СР–ВС 11:00–19:00',
         isActive: true,
       },
@@ -38,8 +38,8 @@ async function main() {
     prisma.exposition.create({
       data: {
         title: 'От великих потрясений к Великой Победе (1914–1945)',
-        description:
-          'Экспозиция охватывает один из самых драматичных периодов отечественной истории: Первая мировая война, революция 1917 года, Гражданская война, индустриализация, Великая Отечественная война и Победа 1945 года.',
+        description: 'Экспозиция охватывает один из самых драматичных периодов отечественной истории: Первая мировая война, революция 1917 года, Гражданская война, индустриализация, Великая Отечественная война и Победа 1945 года.',
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/dc/Raising_a_flag_over_the_Reichstag.jpg/400px-Raising_a_flag_over_the_Reichstag.jpg',
         schedule: 'СР–ВС 11:00–19:00',
         isActive: true,
       },
@@ -47,8 +47,8 @@ async function main() {
     prisma.exposition.create({
       data: {
         title: 'Россия — Моя история (1945 — наши дни)',
-        description:
-          'Послевоенное восстановление, космическая гонка, холодная война, перестройка, распад СССР и становление современной России. Мультимедийные инсталляции позволяют погрузиться в атмосферу каждой эпохи.',
+        description: 'Послевоенное восстановление, космическая гонка, холодная война, перестройка, распад СССР и становление современной России. Мультимедийные инсталляции позволяют погрузиться в атмосферу каждой эпохи.',
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/Sputnik_asm.jpg/400px-Sputnik_asm.jpg',
         schedule: 'СР–ВС 11:00–19:00',
         isActive: true,
       },
@@ -113,19 +113,21 @@ async function main() {
     }),
   ]);
 
-  // Time slots — генерируем на ближайшие 2 недели (СР–ВС)
+  // Time slots — фиксированные даты для демонстрации (22 мая — 30 июня 2026, СР–ВС)
   const times = ['11:00', '13:00', '15:00', '17:00'];
-  const today = new Date();
+  const fixedDates = [];
+
+  const start = new Date('2026-05-22');
+  const end = new Date('2026-06-30');
+
+  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+    const dow = d.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+    if (dow === 1 || dow === 2) continue; // закрыто пн и вт
+    fixedDates.push(new Date(d));
+  }
+
   const slots = [];
-
-  for (let dayOffset = 1; dayOffset <= 14; dayOffset++) {
-    const date = new Date(today);
-    date.setDate(today.getDate() + dayOffset);
-    const dayOfWeek = date.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
-
-    // Skip Mon (1) and Tue (2) — park is closed
-    if (dayOfWeek === 1 || dayOfWeek === 2) continue;
-
+  for (const date of fixedDates) {
     for (const excursion of excursions) {
       for (const time of times) {
         slots.push({
@@ -146,39 +148,39 @@ async function main() {
     data: [
       {
         title: 'Ночь музеев 2026',
-        content:
-          'Приглашаем на ежегодную акцию «Ночь музеев»! Все экспозиции парка будут работать до 23:00. Специальная программа: квесты, мастер-классы, интерактивные лекции.',
+        content: 'Приглашаем на ежегодную акцию «Ночь музеев»! Все экспозиции парка будут работать до 23:00. Специальная программа: квесты, мастер-классы, интерактивные лекции.',
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/National_Museum_Prague_2010b.jpg/400px-National_Museum_Prague_2010b.jpg',
         type: 'EXHIBITION',
         eventDate: new Date('2026-05-16'),
         isActive: true,
       },
       {
         title: 'Лекция «Загадки династии Рюриковичей»',
-        content:
-          'Историк Андрей Сахаров расскажет о малоизвестных фактах из истории первой русской династии. Вход свободный при наличии билета на экспозицию.',
+        content: 'Историк Андрей Сахаров расскажет о малоизвестных фактах из истории первой русской династии. Вход свободный при наличии билета на экспозицию.',
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Nestor_the_Chronicler.jpg/400px-Nestor_the_Chronicler.jpg',
         type: 'LECTURE',
         eventDate: new Date('2026-04-05'),
         isActive: true,
       },
       {
         title: 'Мастер-класс по каллиграфии',
-        content:
-          'Научитесь писать древнерусским уставом и полууставом. Все материалы предоставляются. Возраст: 10+. Необходима предварительная запись.',
+        content: 'Научитесь писать древнерусским уставом и полууставом. Все материалы предоставляются. Возраст: 10+. Необходима предварительная запись.',
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Ostromir_Gospel_%281056-57%29.jpg/400px-Ostromir_Gospel_%281056-57%29.jpg',
         type: 'WORKSHOP',
         eventDate: new Date('2026-04-12'),
         isActive: true,
       },
       {
         title: 'Открытие обновлённой экспозиции «Романовы»',
-        content:
-          'После масштабной реконструкции зал «Романовы» открывается с новыми мультимедийными инсталляциями и интерактивными панелями.',
+        content: 'После масштабной реконструкции зал «Романовы» открывается с новыми мультимедийными инсталляциями и интерактивными панелями.',
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/RomanovFamily1913.jpg/400px-RomanovFamily1913.jpg',
         type: 'NEWS',
         isActive: true,
       },
       {
         title: 'Олимпиада «Знатоки истории» для школьников',
-        content:
-          'Приглашаем школьников 7–11 классов на историческую олимпиаду. Победители получат бесплатные абонементы на все экспозиции парка.',
+        content: 'Приглашаем школьников 7–11 классов на историческую олимпиаду. Победители получат бесплатные абонементы на все экспозиции парка.',
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/Baptism_of_Vladimir.jpg/400px-Baptism_of_Vladimir.jpg',
         type: 'EXHIBITION',
         eventDate: new Date('2026-04-20'),
         isActive: true,
