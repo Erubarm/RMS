@@ -117,7 +117,7 @@ async function main() {
   const times = ['11:00', '13:00', '15:00', '17:00'];
   const fixedDates = [];
 
-  const start = new Date('2026-05-22');
+  const start = new Date('2026-05-21');
   const end = new Date('2026-06-30');
 
   for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
