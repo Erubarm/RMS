@@ -14,7 +14,7 @@ import {
   CardGrid,
   Card,
 } from '@vkontakte/vkui';
-import { Icon56CalendarOutline } from '@vkontakte/icons';
+import { Icon56CalendarOutline, Icon56GalleryOutline } from '@vkontakte/icons';
 import { useRouteNavigator } from '@vkontakte/vk-mini-apps-router';
 import { useEvents } from '../api/hooks';
 
@@ -73,6 +73,27 @@ function Events() {
           <CardGrid size="l">
             {events.map((event, index) => (
               <Card key={event.id || event._id || index}>
+                <div
+                  style={{
+                    height: 140,
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    borderRadius: '8px 8px 0 0',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    overflow: 'hidden',
+                  }}
+                >
+                  {event.imageUrl ? (
+                    <img
+                      src={event.imageUrl}
+                      alt={event.title}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px 8px 0 0' }}
+                    />
+                  ) : (
+                    <Icon56GalleryOutline fill="#fff" />
+                  )}
+                </div>
                 <Box>
                   <Title level="3">{event.title}</Title>
                   <Spacing size={4} />
