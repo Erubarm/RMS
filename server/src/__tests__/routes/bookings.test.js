@@ -84,7 +84,7 @@ describe('POST /api/bookings — создание бронирования', () 
   test('возвращает 400 если peopleCount < 1', async () => {
     const res = await request(createApp())
       .post('/api/bookings')
-      .send({ timeSlotId: 1, peopleCount: 0 });
+      .send({ timeSlotId: 1, peopleCount: 0, phone: '+79001234567' });
 
     expect(res.status).toBe(400);
   });
