@@ -30,12 +30,13 @@ app.use(helmet({
 app.use(cors());
 app.use(express.json());
 
-// Rate limiting
+// Rate limiting (mini-app routes only; admin panel is exempt)
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 min
-  max: 100,
+  max: process.env.NODE_ENV === 'production' ? 100 : 1000,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: (req) => req.path.startsWith('/admin'),
 });
 app.use('/api', limiter);
 
@@ -78,7 +79,14 @@ app.use('/api/notifications', notificationsRouter);
 // Error handler
 app.use(errorHandler);
 
-// Serve client (after API routes)
+// Admin panel at /panel (must be before client catch-all)
+const adminDist = path.join(__dirname, '../../admin/dist');
+app.use('/panel', express.static(adminDist));
+app.get('/panel/*splat', (req, res) => {
+  res.sendFile(path.join(adminDist, 'index.html'));
+});
+
+// VK Mini App client — catch-all last
 const clientDist = path.join(__dirname, '../../client/dist');
 app.use(express.static(clientDist));
 app.get('*splat', (req, res) => {

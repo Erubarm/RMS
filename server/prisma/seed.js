@@ -13,6 +13,7 @@ async function main() {
   await prisma.event.deleteMany();
   await prisma.faq.deleteMany();
   await prisma.teacherRequest.deleteMany();
+  await prisma.user.deleteMany();
   console.log('Cleared existing data.');
 
   // Expositions — реальные залы парка "Россия — Моя история"
@@ -229,6 +230,74 @@ async function main() {
       },
     ],
   });
+
+  // Test users
+  const users = await Promise.all([
+    prisma.user.create({ data: { vkId: 1, firstName: 'Dev', lastName: 'User', role: 'ADMIN' } }),
+    prisma.user.create({ data: { vkId: 100001, firstName: 'Анна', lastName: 'Смирнова' } }),
+    prisma.user.create({ data: { vkId: 100002, firstName: 'Михаил', lastName: 'Козлов' } }),
+    prisma.user.create({ data: { vkId: 100003, firstName: 'Елена', lastName: 'Новикова' } }),
+    prisma.user.create({ data: { vkId: 100004, firstName: 'Дмитрий', lastName: 'Орлов' } }),
+    prisma.user.create({ data: { vkId: 100005, firstName: 'Ольга', lastName: 'Захарова' } }),
+  ]);
+
+  // Test bookings — разные статусы, слоты начиная с сегодня
+  const todayStr = '2026-05-21';
+  const tomorrowStr = '2026-05-22';
+  const nextWeekStr = '2026-05-27';
+
+  // Найдём слоты на нужные даты
+  const slotsToday = await prisma.timeSlot.findMany({
+    where: { date: new Date(todayStr) },
+    take: 4,
+    orderBy: [{ excursionId: 'asc' }, { time: 'asc' }],
+  });
+  const slotsTomorrow = await prisma.timeSlot.findMany({
+    where: { date: new Date(tomorrowStr) },
+    take: 3,
+    orderBy: [{ excursionId: 'asc' }, { time: 'asc' }],
+  });
+  const slotsNextWeek = await prisma.timeSlot.findMany({
+    where: { date: new Date(nextWeekStr) },
+    take: 3,
+    orderBy: [{ excursionId: 'asc' }, { time: 'asc' }],
+  });
+
+  const bookingData = [
+    // Сегодняшние — уже завершены/отменены
+    { user: users[1], slot: slotsToday[0], people: 2, phone: '+79161234501', status: 'CONFIRMED',  code: 'RMI-TEST-001' },
+    { user: users[2], slot: slotsToday[1], people: 4, phone: '+79161234502', status: 'COMPLETED',  code: 'RMI-TEST-002' },
+    { user: users[3], slot: slotsToday[2], people: 1, phone: '+79161234503', status: 'CANCELLED',  code: 'RMI-TEST-003' },
+    { user: users[4], slot: slotsToday[3], people: 3, phone: '+79161234504', status: 'PENDING',    code: 'RMI-TEST-004' },
+    // Завтра — ожидают подтверждения
+    { user: users[5], slot: slotsTomorrow[0], people: 5, phone: '+79161234505', status: 'PENDING',    code: 'RMI-TEST-005' },
+    { user: users[1], slot: slotsTomorrow[1], people: 2, phone: '+79161234506', status: 'CONFIRMED',  code: 'RMI-TEST-006' },
+    { user: users[2], slot: slotsTomorrow[2], people: 3, phone: '+79161234507', status: 'PENDING',    code: 'RMI-TEST-007' },
+    // Следующая неделя — новые записи
+    { user: users[3], slot: slotsNextWeek[0], people: 6, phone: '+79161234508', status: 'PENDING',    code: 'RMI-TEST-008' },
+    { user: users[4], slot: slotsNextWeek[1], people: 2, phone: '+79161234509', status: 'CONFIRMED',  code: 'RMI-TEST-009' },
+    { user: users[5], slot: slotsNextWeek[2], people: 1, phone: '+79161234510', status: 'PENDING',    code: 'RMI-TEST-010' },
+  ];
+
+  for (const b of bookingData) {
+    if (!b.slot) continue;
+    await prisma.booking.create({
+      data: {
+        userId: b.user.id,
+        timeSlotId: b.slot.id,
+        peopleCount: b.people,
+        phone: b.phone,
+        status: b.status,
+        code: b.code,
+      },
+    });
+    // Уменьшим availableSpots у слота
+    await prisma.timeSlot.update({
+      where: { id: b.slot.id },
+      data: { availableSpots: { decrement: b.people } },
+    });
+  }
+  console.log(`Created ${bookingData.filter(b => b.slot).length} test bookings`);
 
   console.log('Seed completed successfully!');
 }

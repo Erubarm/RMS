@@ -15,8 +15,10 @@ function ProtectedRoute({ children }) {
 }
 
 export default function App() {
+  const basename = import.meta.env.PROD ? '/panel' : '';
+
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={basename}>
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/admin" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
