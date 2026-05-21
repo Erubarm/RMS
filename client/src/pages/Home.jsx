@@ -17,6 +17,7 @@ import {
   Icon28ListOutline,
   Icon28PlaceOutline,
   Icon28CalendarOutline,
+  Icon28UserOutline,
 } from '@vkontakte/icons';
 import { useRouteNavigator } from '@vkontakte/vk-mini-apps-router';
 import client from '../api/client';
@@ -87,6 +88,13 @@ function Home() {
           expandable="auto"
         >
           Как добраться
+        </SimpleCell>
+        <SimpleCell
+          before={<Icon28UserOutline />}
+          onClick={() => routeNavigator.push('/my-bookings')}
+          expandable="auto"
+        >
+          Мой профиль
         </SimpleCell>
       </Group>
 
