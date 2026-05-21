@@ -6,11 +6,15 @@ const { generateBookingCode } = require('../utils/generateCode');
 // POST / — create booking
 router.post('/', async (req, res, next) => {
   try {
-    const { timeSlotId, peopleCount } = req.body;
+    const { timeSlotId, peopleCount, phone } = req.body;
     const userId = req.user.id;
 
     if (!timeSlotId || !peopleCount) {
       return res.status(400).json({ error: 'timeSlotId and peopleCount are required', code: 400 });
+    }
+
+    if (!phone || typeof phone !== 'string' || phone.trim().length === 0) {
+      return res.status(400).json({ error: 'phone is required', code: 400 });
     }
 
     if (peopleCount < 1) {
@@ -50,6 +54,7 @@ router.post('/', async (req, res, next) => {
         userId,
         timeSlotId,
         peopleCount,
+        phone: phone.trim(),
         code,
       },
       include: {

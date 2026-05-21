@@ -56,11 +56,20 @@ describe('POST /api/bookings — создание бронирования', () 
 
     const res = await request(createApp())
       .post('/api/bookings')
-      .send({ timeSlotId: 1, peopleCount: 2 });
+      .send({ timeSlotId: 1, peopleCount: 2, phone: '+79001234567' });
 
     expect(res.status).toBe(201);
     expect(res.body.code).toBe('RMI-TESTCODE');
     expect(prisma.booking.create).toHaveBeenCalled();
+  });
+
+  test('возвращает 400 если не передан phone', async () => {
+    const res = await request(createApp())
+      .post('/api/bookings')
+      .send({ timeSlotId: 1, peopleCount: 2 });
+
+    expect(res.status).toBe(400);
+    expect(res.body.error).toMatch(/phone/i);
   });
 
   test('возвращает 400 если не переданы обязательные поля', async () => {
@@ -85,7 +94,7 @@ describe('POST /api/bookings — создание бронирования', () 
 
     const res = await request(createApp())
       .post('/api/bookings')
-      .send({ timeSlotId: 999, peopleCount: 1 });
+      .send({ timeSlotId: 999, peopleCount: 1, phone: '+79001234567' });
 
     expect(res.status).toBe(404);
   });
@@ -96,7 +105,7 @@ describe('POST /api/bookings — создание бронирования', () 
 
     const res = await request(createApp())
       .post('/api/bookings')
-      .send({ timeSlotId: 1, peopleCount: 3 }); // 4 занято + 3 = 7 > 5
+      .send({ timeSlotId: 1, peopleCount: 3, phone: '+79001234567' }); // 4 занято + 3 = 7 > 5
 
     expect(res.status).toBe(400);
     expect(res.body.error).toMatch(/not enough available spots/i);
@@ -109,7 +118,7 @@ describe('POST /api/bookings — создание бронирования', () 
 
     const res = await request(createApp())
       .post('/api/bookings')
-      .send({ timeSlotId: 1, peopleCount: 2 }); // ровно 2 свободных
+      .send({ timeSlotId: 1, peopleCount: 2, phone: '+79001234567' }); // ровно 2 свободных
 
     expect(res.status).toBe(201);
   });
