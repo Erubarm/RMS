@@ -55,9 +55,9 @@ function Booking() {
       const res = await client.post('/bookings', {
         excursionId: selectedExcursionId,
         date: selectedDate,
-        slotId: selectedSlot?.id || selectedSlot?._id,
+        timeSlotId: selectedSlot?.id || selectedSlot?._id,
         time: selectedSlot?.time,
-        people: peopleCount,
+        peopleCount,
         phone,
       });
       setBookingResult(res.data);
