@@ -33,6 +33,8 @@ function Booking() {
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [peopleCount, setPeopleCount] = useState(1);
+  const [phone, setPhone] = useState('');
+  const [phoneError, setPhoneError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [bookingResult, setBookingResult] = useState(null);
   const [submitError, setSubmitError] = useState(null);
@@ -40,6 +42,11 @@ function Booking() {
   const { expositions } = useExpositions();
   const { excursion } = useExcursion(selectedExcursionId);
   const { slots, loading: slotsLoading } = useSlots(selectedExcursionId, selectedDate);
+
+  const validatePhone = (value) => {
+    const digits = value.replace(/\D/g, '');
+    return digits.length >= 10;
+  };
 
   const handleSubmit = async () => {
     setSubmitting(true);
@@ -51,9 +58,10 @@ function Booking() {
         slotId: selectedSlot?.id || selectedSlot?._id,
         time: selectedSlot?.time,
         people: peopleCount,
+        phone,
       });
       setBookingResult(res.data);
-      setStep(5);
+      setStep(6);
     } catch (err) {
       setSubmitError(err.response?.data?.message || 'Произошла ошибка при бронировании');
     } finally {
@@ -66,7 +74,7 @@ function Booking() {
     return (
       <>
         <PanelHeader before={<PanelHeaderBack onClick={() => routeNavigator.back()} />}>
-          Запись — Шаг 1/4
+          Запись — Шаг 1/5
         </PanelHeader>
         <Group header={<Header>Выберите экскурсию</Header>}>
           {expositions.length === 0 ? (
@@ -121,7 +129,7 @@ function Booking() {
     return (
       <>
         <PanelHeader before={<PanelHeaderBack onClick={() => excursionIdFromRoute ? routeNavigator.back() : setStep(1)} />}>
-          Запись — Шаг 2/4
+          Запись — Шаг 2/5
         </PanelHeader>
         <Group header={<Header>Выберите дату</Header>}>
           <FormItem top="Дата посещения">
@@ -153,7 +161,7 @@ function Booking() {
     return (
       <>
         <PanelHeader before={<PanelHeaderBack onClick={() => setStep(2)} />}>
-          Запись — Шаг 3/4
+          Запись — Шаг 3/5
         </PanelHeader>
         <Group header={<Header>Выберите время и количество</Header>}>
           {slotsLoading ? (
@@ -227,12 +235,56 @@ function Booking() {
     );
   }
 
-  // Step 4: Confirmation
+  // Step 4: Phone number
   if (step === 4) {
     return (
       <>
         <PanelHeader before={<PanelHeaderBack onClick={() => setStep(3)} />}>
-          Запись — Шаг 4/4
+          Запись — Шаг 4/5
+        </PanelHeader>
+        <Group header={<Header>Контактный телефон</Header>}>
+          <FormItem
+            top="Номер телефона"
+            status={phoneError ? 'error' : undefined}
+            bottom={phoneError || 'Для связи с вами по вопросам записи'}
+          >
+            <Input
+              type="tel"
+              placeholder="+7 (900) 000-00-00"
+              value={phone}
+              onChange={(e) => {
+                setPhone(e.target.value);
+                setPhoneError('');
+              }}
+            />
+          </FormItem>
+          <Box>
+            <Button
+              size="l"
+              mode="primary"
+              stretched
+              onClick={() => {
+                if (!validatePhone(phone)) {
+                  setPhoneError('Введите корректный номер телефона (минимум 10 цифр)');
+                  return;
+                }
+                setStep(5);
+              }}
+            >
+              Далее
+            </Button>
+          </Box>
+        </Group>
+      </>
+    );
+  }
+
+  // Step 5: Confirmation
+  if (step === 5) {
+    return (
+      <>
+        <PanelHeader before={<PanelHeaderBack onClick={() => setStep(4)} />}>
+          Запись — Шаг 5/5
         </PanelHeader>
         <Group header={<Header>Подтверждение</Header>}>
           <Box>
@@ -260,6 +312,10 @@ function Booking() {
             <Spacing size={4} />
             <Text>
               <b>Количество человек:</b> {peopleCount}
+            </Text>
+            <Spacing size={4} />
+            <Text>
+              <b>Телефон:</b> {phone}
             </Text>
             {excursion?.price != null && (
               <>
@@ -296,8 +352,8 @@ function Booking() {
     );
   }
 
-  // Step 5: Success
-  if (step === 5) {
+  // Step 6: Success
+  if (step === 6) {
     return (
       <>
         <PanelHeader>Запись оформлена</PanelHeader>
