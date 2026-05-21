@@ -121,7 +121,7 @@ async function main() {
   const end = new Date('2026-06-30');
 
   for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-    const dow = d.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+    const dow = d.getUTCDay(); // 0=Sun, 1=Mon, ..., 6=Sat
     if (dow === 1 || dow === 2) continue; // закрыто пн и вт
     fixedDates.push(new Date(d));
   }
