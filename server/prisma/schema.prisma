@@ -68,6 +68,7 @@ model Booking {
   timeSlotId  Int
   timeSlot    TimeSlot      @relation(fields: [timeSlotId], references: [id])
   peopleCount Int
+  phone       String
   status      BookingStatus @default(PENDING)
   code        String        @unique
   createdAt   DateTime      @default(now())
