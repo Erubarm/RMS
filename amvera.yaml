@@ -1,6 +1,6 @@
 meta:
   environment: nodejs
-  toolVersion: "20"
+  toolchain: "20"
 
 build:
   npmBuild:
