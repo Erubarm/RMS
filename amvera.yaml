@@ -7,6 +7,6 @@ build:
     buildCommand: "npm run build:all"
 
 run:
-  persistenceMount: /app/data
+  persistenceMount: /mnt/data
   containerPort: 3000
   command: "npm run start:prod"
