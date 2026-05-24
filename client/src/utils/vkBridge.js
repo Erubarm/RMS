@@ -1,6 +1,6 @@
 import vkBridge from '@vkontakte/vk-bridge';
 
-const bridge = vkBridge.default || vkBridge;
+const bridge = vkBridge;
 
 export { bridge };
 
